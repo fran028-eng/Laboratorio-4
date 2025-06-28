@@ -1,0 +1,19 @@
+repositorios practica servidores de correo
+
+
+sudo apt update
+sudo apt install postfix mailutils -y
+sudo nano /etc/postfix/main.cf
+sudo nano /etc/postfix/sasl_passwd
+sudo postmap /etc/postfix/sasl_passwd
+sudo chmod 600 /etc/postfix/sasl_passwd /etc/postfix/sasl_passwd.db
+sudo nano /etc/resolv.conf
+sudo cp /etc/resolv.conf /var/spool/postfix/etc/resolv.conf
+sudo systemctl restart postfix
+echo "Francisco Ortiz - Matrícula 20198529" | mail -s "MambruSeFueALaGuerra" os3conadrian@gmail.com
+mailq
+sudo journalctl -u postfix -f
+sudo postsuper -d ALL
+sudo postfix flush
+
+

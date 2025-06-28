@@ -1,0 +1,27 @@
+repositorio practica servidor de impression
+
+sudo apt install cups -y
+  812  sudo systemctl start cups
+  813  sudo systemctl status cups
+  814  sudo systemctl start cups
+  815  sudo systemctl status cups
+  816  sudo systemctl enable cups
+  817  sudo systemctl status cups
+  818  sudo systemctl restart cups
+  819  cupsctl --remote-admin --remote-any --share-printers
+  820  ip a
+  821  ufw allow 661/tcp
+  822  ufw status 661/tcp
+  823  ufw status verbose
+  824  sudo nano /etc/postfix/main.cf
+  825  clear
+  826  sudo nano /etc/postfix/main.cf
+  827  ufw status verbose
+  828  cupsctl
+  829  systemctl status cups
+  830  cleae
+  831  clear
+  832  ip a
+  833  sudo systemctl restart cups
+  834  apt install cups-pdf
+  835  sudo systemctl restart cups
