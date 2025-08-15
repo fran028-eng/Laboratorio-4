@@ -1,27 +1,105 @@
 repositorio practica servidor de impression
 
-sudo apt install cups -y
-  812  sudo systemctl start cups
-  813  sudo systemctl status cups
-  814  sudo systemctl start cups
-  815  sudo systemctl status cups
-  816  sudo systemctl enable cups
-  817  sudo systemctl status cups
-  818  sudo systemctl restart cups
-  819  cupsctl --remote-admin --remote-any --share-printers
-  820  ip a
-  821  ufw allow 661/tcp
-  822  ufw status 661/tcp
-  823  ufw status verbose
-  824  sudo nano /etc/postfix/main.cf
-  825  clear
-  826  sudo nano /etc/postfix/main.cf
-  827  ufw status verbose
-  828  cupsctl
-  829  systemctl status cups
-  830  cleae
-  831  clear
-  832  ip a
-  833  sudo systemctl restart cups
-  834  apt install cups-pdf
-  835  sudo systemctl restart cups
+#1)1 Instalar CUPS y la impresora virtual CUPS-PDF
+
+sudo apt update
+sudo apt install cups cups-pdf -y
+
+
+#2️ Habilitar y arrancar el servicio CUPS
+
+sudo systemctl enable cups
+sudo systemctl start cups
+sudo systemctl status cups
+
+
+#3️ Permitir la administración remota y compartir impresoras
+
+
+sudo cupsctl --remote-admin --remote-any --share-printers
+
+
+#4️ Abrir el puerto de CUPS (631/tcp)
+
+sudo ufw allow 631/tcp
+sudo ufw reload
+
+
+#5️ Añadir tu usuario al grupo lpadmin (para administrar vía web)
+
+sudo usermod -aG lpadmin $(whoami)
+
+#⚠️ Cierra sesión y vuelve a entrar para que se apliquen los permisos, o usa newgrp lpadmin
+
+
+#6️ Acceder a la interfaz web de CUPS
+#En el navegador, abre:
+
+http://<IP_DEL_SERVIDOR>:631
+
+
+
+#7️ Configuración vía web
+
+Ve a Administration → Add Printer.
+
+Introduce usuario y contraseña del sistema (usuario que está en lpadmin).
+
+Selecciona la impresora CUPS-PDF de la lista.
+
+Asigna:
+
+Name: CUPS-PDF
+
+Description: Impresora PDF virtual
+
+Location: Servidor
+
+Marca Share This Printer.
+
+Selecciona driver:
+
+Si aparece CUPS-PDF, elígelo.
+
+Si no, usa Generic PDF Printer.
+
+Finaliza la configuración.
+
+
+
+#8️ Imprimir página de prueba
+
+En Printers → CUPS-PDF → Maintenance → Print Test Page.
+
+
+
+#9️ Verificar archivo generado
+#Por defecto, los PDFs generados están en:
+
+ls -lt /var/spool/cups-pdf/ /var/spool/cups-pdf/$(whoami) 2>/dev/null
+
+
+#10 Usando el Explorador de archivos (Windows Explorer)
+#En la barra de direcciones de Explorador de archivos, escribe:
+
+\\<IP_DEL_SERVIDOR>
+
+#o
+
+\\<IP_DEL_SERVIDOR>\CUPS-PDF
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
