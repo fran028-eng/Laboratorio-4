@@ -1,19 +1,160 @@
 servidor de HTTP
 
-sudo apt install apache2 -y
-     sudo systemctl status apache2 
-     clear
-     sudo mkdir -p /var/www/hola_mundo 
-     echo '<h1>Hola Mundo</h1>' | sudo tee /var/www/hola_mundo/index.html
-     sudo chown -R www-data:www-data /var/www/hola_mundo 
-     sudo nano /etc/apache2/sites-available/hola_mundo.conf 
-     sudo a2ensite hola_mundo.conf 
-     sudo systemctl reload apache2 
-     sudo nano /etc/hosts  
-     sudo systemctl reload apache2 
-     sudo nano /etc/hosts  
-     clear
-     sudo mkdir -p /var/www/francisco_20198529
-     sudo nano /etc/hosts  
-     sudo mkdir -p /var/www/francisco_20198529
-     sudo nano /etc/hosts  
+#1) Instalar Apache y verificar servicio
+
+sudo apt update
+sudo apt install -y apache2
+sudo systemctl enable --now apache2
+sudo systemctl status apache2 --no-pager
+
+
+#2) Crear los directorios y las páginas estáticas
+
+# Sitio 1 (Puerto 80)
+sudo mkdir -p /var/www/hola_mundo
+echo '<h1>Hola Mundo</h1>' | sudo tee /var/www/hola_mundo/index.html
+sudo chown -R www-data:www-data /var/www/hola_mundo
+sudo chmod -R 755 /var/www/hola_mundo
+
+# Sitio 2 (Puerto 8080) — incluye nombre, matrícula y materia
+sudo mkdir -p /var/www/francisco_20198529
+echo '<h1>Francisco Ortiz - Matrícula: 2019-8529 - Materia: SISTEMAS_OPERATVOS_3 </h1>' | sudo tee /var/www/francisco_20198529/index.html
+sudo chown -R www-data:www-data /var/www/francisco_20198529
+sudo chmod -R 755 /var/www/francisco_20198529
+
+
+#3) Hacer que Apache escuche en el puerto 8080 (añadir Listen)
+
+# Añade Listen 8080 si no existe
+if ! grep -q '^Listen 8080' /etc/apache2/ports.conf; then
+  echo 'Listen 8080' | sudo tee -a /etc/apache2/ports.conf
+fi
+
+
+#4) Crear VirtualHost para puerto 80 (hola_mundo.conf)
+
+sudo tee /etc/apache2/sites-available/hola_mundo.conf > /dev/null <<'EOF'
+<VirtualHost *:80>
+    ServerName holamundo.local
+    DocumentRoot /var/www/hola_mundo
+
+    <Directory /var/www/hola_mundo>
+        Options -Indexes +FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/hola_mundo_error.log
+    CustomLog ${APACHE_LOG_DIR}/hola_mundo_access.log combined
+</VirtualHost>
+EOF
+
+
+
+#5) Crear VirtualHost para puerto 8080 (francisco_20198529.conf)
+
+sudo tee /etc/apache2/sites-available/francisco_20198529.conf > /dev/null <<'EOF'
+<VirtualHost *:8080>
+    ServerName francisco20198529.local
+    DocumentRoot /var/www/francisco_20198529
+
+    <Directory /var/www/francisco_20198529>
+        Options -Indexes +FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    ErrorLog ${APACHE_LOG_DIR}/francisco_error.log
+    CustomLog ${APACHE_LOG_DIR}/francisco_access.log combined
+</VirtualHost>
+EOF
+
+
+#6) Habilitar los sitios y comprobar configuración
+
+sudo a2ensite hola_mundo.conf
+sudo a2ensite francisco_20198529.conf
+
+# Test de configuración de Apache
+sudo apache2ctl configtest
+
+# Recargar Apache
+sudo systemctl reload apache2
+
+#(El configtest debería decir Syntax OK.)
+
+
+
+#7) Mapear nombres (opcional — para probar con nombres en la misma máquina o cliente)
+Obtén la IP del servidor y añade las entradas al /etc/hosts (en la máquina cliente o en el servidor para pruebas locales):
+
+IP=$(hostname -I | awk '{print $1}')
+echo "$IP holamundo.local francisco20198529.local" | sudo tee -a /etc/hosts
+#(En Windows o en otra máquina cliente edita su C:\Windows\System32\drivers\etc\hosts o /etc/hosts respectivamente con la misma línea.)
+
+
+
+#8) Abrir firewall (si usas UFW)
+# Permitir HTTP y puerto 8080
+sudo ufw allow 80/tcp
+sudo ufw allow 8080/tcp
+sudo ufw reload
+sudo ufw status verbose
+
+
+
+#9) Validaciones rápidas
+
+# Comprobar que Apache escucha ambos puertos
+sudo ss -tuln | grep -E ':80\b|:8080\b'
+
+# Probando desde el servidor (o desde cliente si añadiste /etc/hosts)
+curl -I http://holamundo.local
+curl -I http://francisco20198529.local:8080
+
+# Ver el contenido (opcional)
+curl http://holamundo.local
+curl http://francisco20198529.local:8080
+
+
+
+10) Logs y troubleshooting
+
+# Ver logs de acceso / error
+sudo tail -n 50 /var/log/apache2/hola_mundo_access.log
+sudo tail -n 50 /var/log/apache2/hola_mundo_error.log
+sudo tail -n 50 /var/log/apache2/francisco_access.log
+sudo tail -n 50 /var/log/apache2/francisco_error.log
+
+# Si apache falla al recargar
+sudo journalctl -u apache2 -n 200 --no-pager
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
